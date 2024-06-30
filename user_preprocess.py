@@ -5,16 +5,49 @@
 
 import json
 from os.path import join, split as split_path
+from langdetect import detect, DetectorFactory
+from transformers import MarianMTModel, MarianTokenizer
+
+# Setup the language detection
+DetectorFactory.seed = 0
+
+def de_to_english(text):
+    de_en_model = MarianMTModel.from_pretrained("Helsinki-NLP/opus-mt-de-en")
+    de_en_tokenizer = MarianTokenizer.from_pretrained("Helsinki-NLP/opus-mt-de-en")
+    inputs = de_en_tokenizer(text, return_tensors="pt", padding=True)
+    outputs = de_en_model.generate(**inputs)
+    return de_en_tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+def tr_to_english(text):
+    tr_en_model = MarianMTModel.from_pretrained("Helsinki-NLP/opus-mt-tr-en")
+    tr_en_tokenizer = MarianTokenizer.from_pretrained("Helsinki-NLP/opus-mt-tr-en")
+    inputs = tr_en_tokenizer(text, return_tensors="pt", padding=True)
+    outputs = tr_en_model.generate(**inputs)
+    return tr_en_tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+# This function should return the detected language of the input text
+def detect_language(text):
+    accepted_languages = ["de", "tr", "en"]
+    if detect(text) in accepted_languages:
+        return detect(text)
+    else:
+        return "en"
 
 # TODO Implement the preprocessing steps here
 def handle_input_file(file_location, output_path):
     with open(file_location) as f:
         data = json.load(f)
     
-    # ...
+    # Detect the language of the articles and translate them to English
+    article = data["content"]
+    language = detect_language(article)
+    if language == "de":
+        data["content"] = de_to_english(article)
+    elif language == "tr":
+        data["content"] = tr_to_english(article)
+
     transformed_data = data
-    # ...
-    
+
     file_name = split_path(file_location)[-1]
     with open(join(output_path, file_name), "w") as f:
         json.dump(transformed_data, f)
