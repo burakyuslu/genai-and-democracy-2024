@@ -3,6 +3,9 @@
 # All important arguments will be passed via the command line.
 # The input files will adhere to the format specified in datastructure/input-file.json
 
+
+# python user_preprocess.py --input "./sample_data/article_1.json" --input "./sample_data/article_2.json" --input "./sample_data/article_3.json" --input "./sample_data/article_4.json" --output "./preprocessed_articles/preprocessed_articles.json"
+
 import json
 from os.path import join, split as split_path
 from langdetect import detect, DetectorFactory
@@ -41,7 +44,7 @@ def detect_language(text):
 
 # TODO Implement the preprocessing steps here
 def handle_input_file(file_location, output_path):
-    with open(file_location, 'r') as f:
+    with open(file_path, 'r') as f:
         data = json.load(f)
 
     article = "".join(data["content"])
@@ -54,22 +57,7 @@ def handle_input_file(file_location, output_path):
     else:
         translated_text = article
 
-    transformed_data = {
-        "transformed_representation": translated_text
-    }
-
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
-    mode = 'a' if exists(output_file) else 'w'
-    with open(output_file, mode) as f:
-        if mode == 'a':
-            f.seek(0, os.SEEK_END)
-            f.seek(f.tell() - 1, os.SEEK_SET)
-            f.truncate()  # Remove the last closing bracket
-            f.write(',')  # Prepare to append new JSON object
-        else:
-            f.write('[')  # Start an array if file is new
-        json.dump(transformed_data, f)
-        f.write(']')
+    transformed_texts.append(translated_text)
 
 
     
@@ -83,15 +71,28 @@ if __name__ == "__main__":
     args = parser.parse_args()
     output_file = args.output
 
-    print(f"Input Files: {args.input}")
-    print(f"Output File: {output_file}")
-    print(f"Input 1: {args.input[0]}")
-    print(f"Input 2: {args.input[1]}")
+    # Remove existing output file if it exists
+    if exists(output_file):
+        os.remove(output_file)
 
+    transformed_texts = []
 
     for file_path in args.input:
         if isfile(file_path):
-            handle_input_file(file_path, output_file)
+            handle_input_file(file_path, transformed_texts)
         else:
             print(f"File does not exist: {file_path}")
+
+    # Create the output structure
+    output_data = {
+        "transformed_representation": transformed_texts
+    }
+
+    # Write the data to the output file
+    # Write the data to the output file with improved readability
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    with open(output_file, 'w') as f:
+        json.dump(output_data, f, indent=4, separators=(',', ': '))
+
+    print(f"Output has been written to {output_file}")
  
