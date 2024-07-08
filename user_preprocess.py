@@ -33,24 +33,32 @@ def detect_language(text):
     else:
         return "en"
 
-# TODO Implement the preprocessing steps here
 def handle_input_file(file_location, output_path):
-    with open(file_location) as f:
+    with open(file_location, 'r') as f:
         data = json.load(f)
     
     # Detect the language of the articles and translate them to English
-    article = data["content"]
+    article = " ".join(data["content"])
     language = detect_language(article)
-    if language == "de":
-        data["content"] = de_to_english(article)
-    elif language == "tr":
-        data["content"] = tr_to_english(article)
 
-    transformed_data = data
+    if language == "de":
+        translated_text = de_to_english(article)
+    elif language == "tr":
+        translated_text = tr_to_english(article)
+    else:
+        translated_text = article
+
+    transformed_data = {
+        # "title": data["title"],
+        # "timestamp": data["timestamp"],
+        "transformed_representation": [translated_text]
+    }
 
     file_name = split_path(file_location)[-1]
-    with open(join(output_path, file_name), "w") as f:
+    output_file_path = join(output_path, file_name)
+    with open(output_file_path, 'w') as f:
         json.dump(transformed_data, f)
+
     
 
 # This is a useful argparse-setup, you probably want to use in your project:
