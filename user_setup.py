@@ -36,13 +36,11 @@ def download_large_files():
     Downloads all required large files such as model weights.
     """
 
-    # We do not download BERT here, as we use our own fine tuned version of BERT.
-    # TODO: Import our fine tuned BERT here.
+    relative_local_bert_path = 'fine-tuned-BERT'
+    # Download our fine-tuned BERT
+    if not download_model(relative_local_bert_path, BertModel, BertTokenizer):
+        return False
 
-    # (replace 'bert-finetuned' with your actual model name)
-    # if not download_model('bert-finetuned', BertModel, BertTokenizer):
-    #     return False
-    
     # Downloading GPT-Neo 2.7B
     if not download_model('EleutherAI/gpt-neo-2.7B', GPTNeoModel, GPT2Tokenizer):
         return False
