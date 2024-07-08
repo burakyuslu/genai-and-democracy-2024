@@ -8,6 +8,12 @@ from os.path import join, split as split_path
 from langdetect import detect, DetectorFactory
 from transformers import MarianMTModel, MarianTokenizer
 
+import os
+from os import listdir
+from os.path import isfile, join, exists
+import argparse
+from os.path import exists
+
 # Setup the language detection
 DetectorFactory.seed = 0
 
@@ -37,8 +43,7 @@ def detect_language(text):
 def handle_input_file(file_location, output_path):
     with open(file_location, 'r') as f:
         data = json.load(f)
-    
-    # Detect the language of the articles and translate them to English
+
     article = "".join(data["content"])
     language = detect_language(article)
 
@@ -50,30 +55,43 @@ def handle_input_file(file_location, output_path):
         translated_text = article
 
     transformed_data = {
-        # "title": data["title"],
-        # "timestamp": data["timestamp"],
-        "transformed_representation": [translated_text]
+        "transformed_representation": translated_text
     }
 
-    file_name = split_path(file_location)[-1]
-    output_file_path = join(output_path, file_name)
-    with open(output_file_path, 'w') as f:
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    mode = 'a' if exists(output_file) else 'w'
+    with open(output_file, mode) as f:
+        if mode == 'a':
+            f.seek(0, os.SEEK_END)
+            f.seek(f.tell() - 1, os.SEEK_SET)
+            f.truncate()  # Remove the last closing bracket
+            f.write(',')  # Prepare to append new JSON object
+        else:
+            f.write('[')  # Start an array if file is new
         json.dump(transformed_data, f)
+        f.write(']')
+
 
     
 
 # This is a useful argparse-setup, you probably want to use in your project:
-import argparse
 parser = argparse.ArgumentParser(description='Preprocess the data.')
 parser.add_argument('--input', type=str, help='Path to the input data.', required=True, action="append")
 parser.add_argument('--output', type=str, help='Path to the output directory.', required=True)
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    files_inp = args.input
-    files_out = args.output
-    
-    for file_location in files_inp:
-        handle_input_file(file_location, files_out)
+    output_file = args.output
 
+    print(f"Input Files: {args.input}")
+    print(f"Output File: {output_file}")
+    print(f"Input 1: {args.input[0]}")
+    print(f"Input 2: {args.input[1]}")
+
+
+    for file_path in args.input:
+        if isfile(file_path):
+            handle_input_file(file_path, output_file)
+        else:
+            print(f"File does not exist: {file_path}")
  
