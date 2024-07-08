@@ -10,7 +10,7 @@
 import os
 import sys
 import transformers
-from transformers import BertTokenizer, BertModel, GPTNeoModel, GPT2Tokenizer
+from transformers import BertTokenizer, BertModel, GPTNeoModel, GPT2Tokenizer, LlamaModel, LlamaTokenizer
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 import torch
 import sentencepiece
@@ -40,10 +40,15 @@ def download_large_files():
     # Download our fine-tuned BERT
     if not download_model(relative_local_bert_path, BertModel, BertTokenizer):
         return False
-
-    # Downloading GPT-Neo 2.7B
-    if not download_model('EleutherAI/gpt-neo-2.7B', GPTNeoModel, GPT2Tokenizer):
+    
+    relative_local_llama3_path = 'fine-tuned-llama3'
+    if not download_model(relative_local_llama3_path, LlamaModel, LlamaTokenizer):
         return False
+
+    # scrapped from the final pipeline
+    # Downloading GPT-Neo 2.7B
+    # if not download_model('EleutherAI/gpt-neo-2.7B', GPTNeoModel, GPT2Tokenizer):
+    #     return False
     
     # Download translation models for each required language
     for lang in ['de', 'tr']:
