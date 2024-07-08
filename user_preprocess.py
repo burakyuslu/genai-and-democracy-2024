@@ -33,12 +33,13 @@ def detect_language(text):
     else:
         return "en"
 
+# TODO Implement the preprocessing steps here
 def handle_input_file(file_location, output_path):
     with open(file_location, 'r') as f:
         data = json.load(f)
     
     # Detect the language of the articles and translate them to English
-    article = " ".join(data["content"])
+    article = "".join(data["content"])
     language = detect_language(article)
 
     if language == "de":
