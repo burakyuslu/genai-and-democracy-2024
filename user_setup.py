@@ -10,7 +10,7 @@
 import os
 import sys
 import transformers
-from transformers import BertTokenizer, BertModel, GPTNeoModel, GPT2Tokenizer, LlamaModel, LlamaTokenizer
+from transformers import BertTokenizer, BertModel, GPTNeoModel, GPT2Tokenizer
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 import torch
 import sentencepiece
@@ -42,7 +42,7 @@ def download_large_files():
         return False
     
     relative_local_llama3_path = 'fine-tuned-llama3'
-    if not download_model(relative_local_llama3_path, LlamaModel, LlamaTokenizer):
+    if not download_model(relative_local_llama3_path, AutoModelForSeq2SeqLM, AutoTokenizer):
         return False
 
     # scrapped from the final pipeline

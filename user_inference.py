@@ -4,17 +4,16 @@ from os.path import join
 import os
 import json
 from langdetect import detect, DetectorFactory
-from transformers import MarianMTModel, MarianTokenizer, BertModel, BertTokenizer
-import torch
+from transformers import MarianMTModel, MarianTokenizer, BertModel, BertTokenizer, AutoTokenizer, AutoModelForSeq2SeqLM
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 
 # Load BERT model and tokenizer
-tokenizer = BertTokenizer.from_pretrained('C:/Users/buryi/Desktop/nlpseminar/models')
-model = BertModel.from_pretrained('C:/Users/buryi/Desktop/nlpseminar/models')
+tokenizer_bert = BertTokenizer.from_pretrained('fine-tuned-BERT')
+model_bert = BertModel.from_pretrained('fine-tuned-BERT')
 # load LLAMA model and tokenizer
-model_path_llama = 'finetuned_llama3'
-tokenizer_path_llama = 'finetuned_llama3'
+tokenizer_llama = AutoTokenizer.from_pretrained('fine-tuned-llama3')
+model_llama = AutoModelForSeq2SeqLM.from_pretrained('fine-tuned-llama3')
 
 # Setup the language detection
 DetectorFactory.seed = 0
@@ -43,6 +42,18 @@ def detect_language(text):
     else:
         return "en"
 
+# Define function for text generation
+def get_query_suggestions(original_query, max_length=50, num_return_sequences=5):
+    inputs = tokenizer_llama(original_query, return_tensors="pt")
+
+    # Generate alternative queries
+    generated_ids = model_llama.generate(inputs.input_ids.to(model_llama.device),
+                                   max_length=max_length,
+                                   num_return_sequences=num_return_sequences,
+                                   num_beams=num_return_sequences)  # Set num_beams equal to num_return_sequences
+
+    alternative_queries = [tokenizer_llama.decode(g, skip_special_tokens=True) for g in generated_ids]
+    return alternative_queries
 
 # TODO Implement the inference logic here
 def handle_user_query(query, query_id, output_path):
@@ -68,9 +79,8 @@ def handle_user_query(query, query_id, output_path):
     ranked_articles = rank_articles(translated_query, article_representations)
     result["generated_queries"] = ranked_articles
 
-    # Get query suggestions TO-DO
-    query_suggestions = []
-    # query_suggestions = get_query_suggestions()
+    # Get query suggestions
+    query_suggestions = get_query_suggestions(original_query=query)
     result["query_suggestions"] = query_suggestions
     
     # Save the result
@@ -82,8 +92,8 @@ def handle_user_query(query, query_id, output_path):
 
 
 def encode_text(text):
-    inputs = tokenizer(text, return_tensors='pt', max_length=512, truncation=True, padding='max_length')
-    outputs = model(**inputs)
+    inputs = tokenizer_bert(text, return_tensors='pt', max_length=512, truncation=True, padding='max_length')
+    outputs = model_bert(**inputs)
     # Get the embeddings for the first token (CLS token)
     return outputs.last_hidden_state[:,0,:].detach().numpy().reshape(1, -1)
 
