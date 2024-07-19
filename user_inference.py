@@ -70,14 +70,14 @@ def handle_user_query(query, query_id, output_path):
         translated_query = query
 
     # Load the preprocessed articles
-    preprocessed_articles_path = "preprocessed_articles/preprocessed_articles.json"
+    preprocessed_articles_path = "preprocessed-articles/preprocessed-articles.json"
     article_representations = []
     with open(preprocessed_articles_path, "r") as f:
         article_representations = json.load(f)["transformed_representation"]
     
     # Rank the articles
     ranked_articles = rank_articles(translated_query, article_representations)
-    result["generated_queries"] = ranked_articles
+    result["generated_query"] = ranked_articles
 
     # Get query suggestions
     query_suggestions = get_query_suggestions(original_query=query)

@@ -39,9 +39,8 @@ def test_setup():
     
 
 def test_preprocess():
-    output_dir = nanoid()
+    output_dir = nanoid() 
     mkdir(output_dir)
-    
     args = [ "--output", output_dir ]
     articles = ["sample_data/article_1.json"]
     
@@ -58,8 +57,8 @@ def test_preprocess():
     else:
         try:
             for article in articles:
-                assert isfile(join(output_dir, split_path(article)[-1])), f"The file {split_path(article)[-1]} was not created."
-                with open(join(output_dir, split_path(article)[-1]), "r") as f:
+                assert isfile(join(output_dir, "preprocessed-articles.json")), f"The file {split_path(article)[-1]} was not created."
+                with open(join(output_dir, "preprocessed-articles.json"), "r") as f:
                     data = json.load(f)
                     assert "transformed_representation" in data, f"The key 'transformed_representation' was not found in the file {split_path(article)[-1]}."
         
@@ -75,7 +74,6 @@ def test_preprocess():
 def test_inference():
     out_dir = nanoid()
     mkdir(out_dir)
-    
     args = [ "--output", out_dir ]
     queries = ["sports", "soccer", "Munich vs Dortmund"]
     for query in queries:

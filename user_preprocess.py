@@ -44,7 +44,7 @@ def detect_language(text):
 
 # TODO Implement the preprocessing steps here
 def handle_input_file(file_location, output_path):
-    with open(file_path, 'r') as f:
+    with open(file_location, 'r') as f:
         data = json.load(f)
 
     article = "".join(data["content"])
@@ -72,8 +72,8 @@ if __name__ == "__main__":
     output_file = args.output
 
     # Remove existing output file if it exists
-    if exists(output_file):
-        os.remove(output_file)
+    # if exists(output_file):
+    #     os.remove(output_file)
 
     transformed_texts = []
 
@@ -90,8 +90,9 @@ if __name__ == "__main__":
 
     # Write the data to the output file
     # Write the data to the output file with improved readability
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
-    with open(output_file, 'w') as f:
+    # output_dir = os.path.dirname(output_file)
+    # os.makedirs(output_dir, exist_ok=True)
+    with open(output_file + "/preprocessed-articles.json", 'w') as f:
         json.dump(output_data, f, indent=4, separators=(',', ': '))
 
     print(f"Output has been written to {output_file}")
